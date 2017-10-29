@@ -117,10 +117,10 @@ esac
 #
 
 # update the packages
-echo "Updating apt-get and installing iw, batctl, lighttpd, sqlite3 and php packages..."
-apt-get update && apt-get install -y iw batctl lighttpd sqlite3 php5 php5-common php5-cgi php5-sqlite
-lighty-enable-mod fastcgi
-lighty-enable-mod fastcgi-php
+echo "Updating apt-get and installing iw, batctl, lighttpd, sqlite3 and php7.0 packages..."
+apt-get update && apt-get install -y iw batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
+lighttpd-enable-mod fastcgi
+lighttpd-enable-mod fastcgi-php
 service lighttpd force-reload
 # Change the directory owner and group
 chown www-data:www-data /var/www
