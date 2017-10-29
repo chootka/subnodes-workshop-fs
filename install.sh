@@ -376,6 +376,7 @@ EOF
 auto lo
 iface lo inet loopback
 
+allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
 
