@@ -55,10 +55,7 @@ echo $PHY $WLAN1 > /tmp/mesh.log
 		stop)
 			ifconfig $WLAN1 down
 			ifconfig bat0 down
-
-			# batctl if del mesh0
-			# ifconfig mesh0 mtu 1500
-			# iwconfig mesh0 mode managed
+			brctl delif br0 bat0
 		;;
 
 		restart)
