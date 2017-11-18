@@ -1,5 +1,5 @@
-subnodes-lighttpd
-=================
+subnodes--workshop-fs
+=====================
 
 ![](https://david-dm.org/chootka/subnodes.svg)
 
