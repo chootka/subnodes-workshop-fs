@@ -117,8 +117,8 @@ esac
 #
 
 # update the packages
-echo "Updating apt-get and installing iw, batctl, lighttpd, sqlite3 and php7.0 packages..."
-apt-get update && apt-get install -y iw batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
+echo "Updating apt-get and installing iw, samba, samba-common-bin, batctl, lighttpd, sqlite3 and php7.0 packages..."
+apt-get update && apt-get install -y iw samba samba-common-bin batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
 lighttpd-enable-mod fastcgi
 lighttpd-enable-mod fastcgi-php
 service lighttpd force-reload
@@ -128,6 +128,7 @@ chown www-data:www-data /var/www
 chmod 775 /var/www
 # Add the pi user to the www-data group
 usermod -a -G www-data pi
+
 echo ""
 
 echo "Loading the subnodes configuration file..."
@@ -171,10 +172,27 @@ systemctl enable networking
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# CONFIGURE AN ACCESS POINT WITH CAPTIVE PORTAL
+# CONFIGURE AN ACCESS POINT WITH CAPTIVE PORTAL AND SAMBA FILE SHARE  
 #
 
 clear
+# create samba share directory
+echo -en "Creating samba fileshare folder at /home/pi/share..."
+mkdir -m 1775 /home/pi/share
+echo -en "Updating samba configuration file with path of share folder..."
+		cat <<EOF >> /etc/samba/smb.conf
+[share]
+	Comment = Pi shared folder
+    Path = /home/pi/share
+    Browseable = yes
+    Writeable = no
+    only guest = no
+    create mask = 0775       
+    directory mask = 0775
+    Public = yes
+    Guest ok = yes
+EOF
+
 echo "Configuring Access Point..."
 echo ""
 
