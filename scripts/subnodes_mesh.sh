@@ -39,7 +39,9 @@ echo $PHY $WLAN1 > /tmp/mesh.log
 
 			# add the interface to batman
 			batctl if add $WLAN1
+			# bridge loop avoidance
 			batctl ap_isolation 1
+			batctl bl 1
 
 			# add bat0 to our bridge
 			if [[ -x /sys/class/net/br0 ]]; then
