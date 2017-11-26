@@ -42,6 +42,9 @@ echo $PHY $WLAN1 > /tmp/mesh.log
 			# bridge loop avoidance
 			batctl ap_isolation 1
 			batctl bl 1
+			batctl gw_mode GW_MODE
+
+			route add default gw GW_IP
 
 			# add bat0 to our bridge
 			if [[ -x /sys/class/net/br0 ]]; then

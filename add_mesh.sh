@@ -94,6 +94,7 @@ echo "Checking whether to configure mesh point or not..."
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # 	DO CONFIGURE MESH POINT
+#   (assumption is that there is at least one other node in the mesh network that is a gateway)
 #
 
 case $DO_SET_MESH in
@@ -111,14 +112,19 @@ case $DO_SET_MESH in
 		sed -i "s/SSID/$MESH_SSID/" scripts/subnodes_mesh.sh
 		sed -i "s/CELL_ID/$CELL_ID/" scripts/subnodes_mesh.sh
 		sed -i "s/CHAN/$MESH_CHANNEL/" scripts/subnodes_mesh.sh
+		sed -i "s/GW_MODE/$GW_MODE/" scripts/subnodes_mesh.sh
+		sed -i "s/GW_IP/$GW_IP/" scripts/subnodes_mesh.sh
 
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
-interface=br0
-address=/#/$BRIDGE_IP
-address=/apple.com/0.0.0.0
+# DHCP server
 dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
+dhcp-option=option:router,$DHCP_ROUTER
+
+# DNS
+# Set our DNS server to be our gateway
+server=$DNS
 EOF
 	rc=$?
 	if [[ $rc != 0 ]] ; then

@@ -4,7 +4,7 @@
 # Author: Sarah Grant
 # Contributors: Mark Hansen, Matthias Strubel, Danja Vasiliev
 # took guidance from a script by Paul Miller : https://dl.dropboxusercontent.com/u/1663660/scripts/install-rtl8188cus.sh
-# Updated 15 August 2017
+# Updated 26 Nov 2017
 #
 # TO-DO
 # - allow a selection of radio drivers
@@ -117,10 +117,11 @@ esac
 #
 
 # update the packages
-echo "Updating apt-get and installing iw, samba, samba-common-bin, batctl, lighttpd, sqlite3 and php7.0 packages..."
-apt-get update && apt-get install -y iw samba samba-common-bin batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
+echo "Updating apt-get and installing iw, dnsutils, samba, samba-common-bin, batctl, lighttpd, sqlite3 and php7.0 packages..."
+apt-get update && apt-get install -y iw dnsutils samba samba-common-bin batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
 lighttpd-enable-mod fastcgi
 lighttpd-enable-mod fastcgi-php
+# restart lighttpd
 service lighttpd force-reload
 # Change the directory owner and group
 chown www-data:www-data /var/www
@@ -130,7 +131,6 @@ chmod 775 /var/www
 usermod -a -G www-data pi
 
 echo ""
-
 echo "Loading the subnodes configuration file..."
 
 # Check if configuration exists, ask for overwriting
@@ -177,24 +177,57 @@ systemctl enable networking
 
 clear
 # create samba share directory
-echo -en "Creating samba fileshare folder at /home/pi/share..."
-mkdir -m 1775 /home/pi/share
-echo -en "Updating samba configuration file with path of share folder..."
-		cat <<EOF >> /etc/samba/smb.conf
-[share]
-	Comment = Pi shared folder
-    Path = /home/pi/share
-    Browseable = yes
-    Writeable = no
-    only guest = no
-    create mask = 0775       
-    directory mask = 0775
-    Public = yes
-    Guest ok = yes
+echo -en "Creating samba fileshare folder at /home/pi/public..."
+mkdir -m 1775 /home/pi/public
+chown pi:pi /home/pi/public
+
+echo -en "Creating backup of samba configuration file..."
+cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
+rc=$?
+if [[ $rc != 0 ]] ; then
+		echo -en "[FAIL]\n"
+	exit $rc
+else
+	echo -en "[OK]\n"
+fi	
+
+echo -en "Copying smb.conf file over from scripts..."
+cp scripts/smb.conf /etc/samba/smb.conf
+/etc/init.d/samba restart
+
+echo -en "Symlink samba public directory to web server for read-only access at /var/www/public..."
+# create a directory for browsing the public file share
+ln -s /home/pi/public public
+
+# make the directory listing available for this directory
+echo -en "Creating backup of lighttpd configuration file..."
+cp /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.bak
+rc=$?
+if [[ $rc != 0 ]] ; then
+		echo -en "[FAIL]\n"
+	exit $rc
+else
+	echo -en "[OK]\n"
+fi	
+echo -en "Enable directory listing for /public folder..."
+cat <<EOF >> /etc/lighttpd/lighttpd.conf
+$HTTP["url"] =~ "^/public($|/)" {
+        dir-listing.activate = "enable"
+}
 EOF
+	rc=$?
+	if [[ $rc != 0 ]] ; then
+			echo -en "[FAIL]\n"
+		echo ""
+		exit $rc
+	else
+		echo -en "[OK]\n"
+	fi
+echo -en "Restart lighttpd..."
+# restart lighttpd
+service lighttpd force-reload
 
 echo "Configuring Access Point..."
-echo ""
 
 # install required packages
 echo ""
@@ -248,7 +281,8 @@ echo "Checking whether to configure mesh point or not..."
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# 	DO CONFIGURE MESH POINT
+# 	DO CONFIGURE MESH POINT 
+#   (assumption is that there is at least one other node in the mesh network that is a gateway)
 #
 
 case $DO_SET_MESH in
@@ -266,14 +300,19 @@ case $DO_SET_MESH in
 		sed -i "s/SSID/$MESH_SSID/" scripts/subnodes_mesh.sh
 		sed -i "s/CELL_ID/$CELL_ID/" scripts/subnodes_mesh.sh
 		sed -i "s/CHAN/$MESH_CHANNEL/" scripts/subnodes_mesh.sh
+		sed -i "s/GW_MODE/$GW_MODE/" scripts/subnodes_mesh.sh
+		sed -i "s/GW_IP/$GW_IP/" scripts/subnodes_mesh.sh
 
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
-interface=br0
-address=/#/$BRIDGE_IP
-address=/apple.com/0.0.0.0
+# DHCP server
 dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
+dhcp-option=option:router,$DHCP_ROUTER
+
+# DNS
+# Set our DNS server to be our gateway
+server=$DNS
 EOF
 	rc=$?
 	if [[ $rc != 0 ]] ; then
@@ -372,11 +411,14 @@ EOF
 		clear
 		
 		# configure dnsmasq
-		echo -en "Creating dnsmasq configuration file..."
+		echo -en "Creating dnsmasq configuration file with captive portal and DHCP server..."
 		cat <<EOF > /etc/dnsmasq.conf
+# Captive Portal logic (redirects traffic coming in on br0 to our web server)
 interface=wlan0
 address=/#/$AP_IP
 address=/apple.com/0.0.0.0
+
+# DHCP server
 dhcp-range=$AP_DHCP_START,$AP_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
 EOF
 		rc=$?
