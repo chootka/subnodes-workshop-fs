@@ -197,7 +197,9 @@ cp scripts/smb.conf /etc/samba/smb.conf
 
 echo -en "Symlink samba public directory to web server for read-only access at /var/www/public..."
 # create a directory for browsing the public file share
-ln -s /home/pi/public public
+ln -s /home/pi/public /var/www/html/public
+touch /home/pi/public/helloworld.txt
+echo "hello world! browse my file share :)"> /home/pi/public/helloworld.txt
 
 # make the directory listing available for this directory
 echo -en "Creating backup of lighttpd configuration file..."
@@ -211,7 +213,7 @@ else
 fi	
 echo -en "Enable directory listing for /public folder..."
 cat <<EOF >> /etc/lighttpd/lighttpd.conf
-$HTTP["url"] =~ "^/public($|/)" {
+\$HTTP["url"] =~ "^/public($|/)" {
         dir-listing.activate = "enable"
 }
 EOF
