@@ -33,11 +33,11 @@ Also, if this is your first time connecting to your Raspberry Pi headlessly (i.e
 
 * configure your wireless access point and mesh network in subnodes.config in any text editor, or in the command line you can use nano
 
+        cd subnodes
         nano subnodes.config
 
 * run the installation script
 
-        cd subnodes
         sudo ./install.sh
 
 The installation process takes about 15 minutes. After it has completed, you will have a running lighttpd php7 web server, wireless access point, and BATMAN Advanced mesh node. Connecting to the network and navigating to a browser page will redirect you to your new captive portal page. It's only going to be a boilerplate (aka, default) lighttpd web page, so head into /var/www/html and create a new index.html file and go nuts.
