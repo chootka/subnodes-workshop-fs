@@ -137,8 +137,7 @@ if [ -e /etc/subnodes.config ] ; then
                 echo "...overwriting"
                 copy_ok="yes"
         else
-                echo "...not overwriting. Re-reading found configuration file..."
-                . /etc/subnodes.config
+                echo "...not overwriting."
         fi
 else
         copy_ok="yes"
