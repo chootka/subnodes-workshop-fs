@@ -162,8 +162,8 @@ EOF
 
 		# copy iface stanzas; create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
-		cp networks/interfaces/wlan0 /etc/network/interfaces.d/wlan0
-		cp networks/interfaces/br0 /etc/network/interfaces.d/br0
+		cp network/interfaces/wlan0 /etc/network/interfaces.d/wlan0
+		cp network/interfaces/br0 /etc/network/interfaces.d/br0
 
 		cat <<EOF > /etc/network/interfaces
 source-directory /etc/network/interfaces.d
