@@ -309,9 +309,14 @@ case $DO_SET_MESH in
 		sed -i '$a batman-adv' /etc/modules
 		modprobe batman-adv;
 
-		# configure dnsmasq. Why is there no captive portal line?
+		# configure dnsmasq.
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
+# Captive Portal logic (redirects traffic to our web server)
+interface=br0
+address=/#/$BRIDGE_IP
+address=/apple.com/0.0.0.0
+
 # DHCP server
 dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
 dhcp-option=option:router,$DHCP_ROUTER
@@ -501,7 +506,7 @@ echo "denyinterfaces wlan0" >> /etc/dhcpcd.conf
 
 clear
 #update-rc.d hostapd remove
-update-rc.d hostpad enable
+update-rc.d hostapd enable
 update-rc.d dnsmasq enable
 
 read -p "Do you wish to reboot now? [N] " yn

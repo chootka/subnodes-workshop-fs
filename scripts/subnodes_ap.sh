@@ -62,13 +62,14 @@ source /etc/subnodes.config
 
 
 			# load configuration vars and start dnsmasq services
-			sed -i "s/address=\/#\/.*/address=\/#\/$AP_IP/g" /etc/dnsmasq.conf
 			
 			if [[ $DO_SET_MESH = "y" ]]; then
+				sed -i "s/address=\/#\/.*/address=\/#\/$BRIDGE_IP/g" /etc/dnsmasq.conf
 				sed -i "s/dhcp-range=.*/dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
 				sed -i "s/dhcp-option=option:router,.*/dhcp-option=option:router,$DHCP_ROUTER/g" /etc/dnsmasq.conf
 				sed -i "s/server=.*/server=$DNS/g" /etc/dnsmasq.conf
 			else
+				sed -i "s/address=\/#\/.*/address=\/#\/$AP_IP/g" /etc/dnsmasq.conf
 				sed -i "s/dhcp-range=.*/dhcp-range=$AP_DHCP_START,$AP_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
 			fi
 			service dnsmasq start

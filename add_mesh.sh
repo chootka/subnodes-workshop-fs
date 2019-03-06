@@ -143,6 +143,11 @@ case $DO_SET_MESH in
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
+# Captive Portal logic (redirects traffic to our web server)
+interface=br0
+address=/#/$BRIDGE_IP
+address=/apple.com/0.0.0.0
+
 # DHCP server
 dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
 dhcp-option=option:router,$DHCP_ROUTER
