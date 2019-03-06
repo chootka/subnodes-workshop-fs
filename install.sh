@@ -118,7 +118,7 @@ chmod 775 /var/www
 usermod -a -G www-data pi
 
 echo ""
-echo "Copying the subnodes configuration file to /etc/..."
+echo "Copying the subnodes configuration file to /etc..."
 
 
 
