@@ -126,7 +126,7 @@ service lighttpd force-reload
 # Change the directory owner and group
 chown -R www-data:www-data /var/www
 # allow the group to write to the directory
-chmod 775 /var/www
+chmod -R 775 /var/www
 # Add the pi user to the www-data group
 usermod -a -G www-data pi
 
@@ -331,18 +331,18 @@ EOF
 
 		# copy iface stanzas; create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
-		cp networks/interfaces/wlan0 /etc/network/interfaces.d/wlan0
-		cp networks/interfaces/br0 /etc/network/interfaces.d/br0
+		cp network/interfaces/wlan0 /etc/network/interfaces.d/
+		cp network/interfaces/br0 /etc/network/interfaces.d/
 
 		cat <<EOF > /etc/network/interfaces
+source-directory /etc/network/interfaces.d
+
 auto lo
 iface lo inet loopback
 
 allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
-
-source /etc/network/interfaces.d/*
 
 iface default inet dhcp
 EOF
@@ -431,16 +431,16 @@ EOF
 		
 		# copy iface stanzas; create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
-		cp networks/interfaces/wlan0 /etc/network/interfaces.d/wlan0
+		cp network/interfaces/wlan0 /etc/network/interfaces.d/
 		cat <<EOF > /etc/network/interfaces
+source-directory /etc/network/interfaces.d
+
 auto lo
 iface lo inet loopback
 
 allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
-
-source /etc/network/interfaces.d/*
 
 iface default inet dhcp
 EOF

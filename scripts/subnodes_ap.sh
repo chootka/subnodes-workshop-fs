@@ -38,7 +38,7 @@ source /etc/subnodes.config
 
 			# associate the access point interface to a physical devices
 			ifconfig $WLAN0 down
-			
+
 			# put iface into AP mode
 			iw phy $PHY interface add $WLAN0 type __ap
 
@@ -47,22 +47,22 @@ source /etc/subnodes.config
 				brctl addif br0 $WLAN0
 			fi
 
-			# bring up access point iface wireless access point interface
-			ifconfig $WLAN0 up
-
 			# load configuration vars and start networking services
-			sed -i "s/address=.*/address=$AP_IP/g" /etc/network/interfaces.d/wlan0
-			sed -i "s/netmask=.*/netmask=$AP_NETMASK/g" /etc/network/interfaces.d/wlan0
-			
+			sed -i "s/address .*/address $AP_IP/g" /etc/network/interfaces.d/wlan0
+			sed -i "s/netmask .*/netmask $AP_NETMASK/g" /etc/network/interfaces.d/wlan0
+
 			if [[ $DO_SET_MESH = "y" ]]; then
-				sed -i "s/address=.*/address=$BRIDGE_IP/g" /etc/network/interfaces.d/br0
-				sed -i "s/netmask=.*/netmask=$BRIDGE_NETMASK/g" /etc/network/interfaces.d/br0
+				sed -i "s/address .*/address $BRIDGE_IP/g" /etc/network/interfaces.d/br0
+				sed -i "s/netmask .*/netmask $BRIDGE_NETMASK/g" /etc/network/interfaces.d/br0
 			fi
 			/etc/init.d/networking restart
 
-			
+			# bring up access point iface wireless access point interface
+			ifconfig $WLAN0 up
+
+
 			# load configuration vars and start dnsmasq services
-			sed -i "s/address=.*/address=$AP_IP/g" /etc/dnsmasq.conf
+			sed -i "s/address=\/#\/.*/address=\/#\/$AP_IP/g" /etc/dnsmasq.conf
 			
 			if [[ $DO_SET_MESH = "y" ]]; then
 				sed -i "s/dhcp-range=.*/dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
@@ -73,7 +73,7 @@ source /etc/subnodes.config
 			fi
 			service dnsmasq start
 
-			
+
 			# load configuration vars and start hostapd services
 			sed -i "s/driver=.*/driver=$RADIO_DRIVER/g" /etc/hostapd/hostapd.conf
 			sed -i "s/country_code=.*/country_code=$AP_COUNTRY/g" /etc/hostapd/hostapd.conf
@@ -96,8 +96,8 @@ source /etc/subnodes.config
 			fi
 
 			/etc/init.d/hostapd stop
-            service dnsmasq stop
-            service lighttpd stop
+			service dnsmasq stop
+			service lighttpd stop
 		;;
 
 		restart)
