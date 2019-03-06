@@ -9,16 +9,6 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# LOAD CONFIG FILE WITH USER OPTIONS
-#
-#  READ configuration file
-. ./subnodes.config
-
-
 
 
 
@@ -28,6 +18,19 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # CHECK USER PRIVILEGES
 (( `id -u` )) && echo "This script *must* be ran with root privileges, try prefixing with sudo. i.e sudo $0" && exit 1
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# LOAD CONFIG FILE WITH USER OPTIONS
+#
+#  READ configuration file
+. ./subnodes.config
 
 
 
@@ -49,6 +52,36 @@ echo ""
 read -p "This installation script will add a mesh point to your Subnodes set up. It is assumed that you have already installed a Subnodes access point and now wish to add a mesh point. Make sure you plugged a second wireless radio into your Raspberry Pi. Press any key to continue..."
 echo ""
 clear
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# COPY CONFIG FILE TO /etc WITH USER OPTIONS
+#
+# Check if configuration exists, ask for overwriting
+if [ -e /etc/subnodes.config ] ; then
+        read -p "Older config file found! Overwrite? (y/n) [N] " yn
+		case $yn in
+			[Yy]* )
+				echo "...overwriting"
+				copy_ok="yes"
+			;;
+			[Nn]* ) echo "...not overwriting. Re-reading found configuration file."
+					. /etc/subnodes.config
+			;;
+		esac
+else
+        copy_ok="yes"
+fi
+
+# copy config file to /etc
+[ "$copy_ok" == "yes" ] && cp subnodes.config /etc
+
 
 
 
@@ -133,14 +166,14 @@ EOF
 		cp networks/interfaces/br0 /etc/network/interfaces.d/br0
 
 		cat <<EOF > /etc/network/interfaces
+source-directory /etc/network/interfaces.d
+
 auto lo
 iface lo inet loopback
 
 allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
-
-source /etc/network/interfaces.d/*
 
 iface default inet dhcp
 EOF

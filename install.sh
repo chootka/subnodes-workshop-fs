@@ -71,6 +71,36 @@ clear
 
 
 
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# COPY CONFIG FILE TO /etc WITH USER OPTIONS
+#
+# Check if configuration exists, ask for overwriting
+if [ -e /etc/subnodes.config ] ; then
+        read -p "Older config file found! Overwrite? (y/n) [N] " yn
+		case $yn in
+			[Yy]* )
+				echo "...overwriting"
+				copy_ok="yes"
+			;;
+			[Nn]* ) echo "...not overwriting. Re-reading found configuration file."
+					. /etc/subnodes.config
+			;;
+		esac
+else
+        copy_ok="yes"
+fi
+
+# copy config file to /etc
+[ "$copy_ok" == "yes" ] && cp subnodes.config /etc
+
+
+
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -132,36 +162,6 @@ usermod -a -G www-data pi
 
 echo ""
 echo "Copying the subnodes configuration file to /etc..."
-
-
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# COPY CONFIG FILE TO /etc WITH USER OPTIONS
-#
-# Check if configuration exists, ask for overwriting
-if [ -e /etc/subnodes.config ] ; then
-        read -p "Older config file found! Overwrite? (y/n) [N] " yn
-		case $yn in
-			[Yy]* )
-				echo "...overwriting"
-				copy_ok="yes"
-			;;
-			[Nn]* ) echo "...not overwriting. Re-reading found configuration file."
-					. /etc/subnodes.config
-			;;
-		esac
-else
-        copy_ok="yes"
-fi
-
-# copy config file to /etc
-[ "$copy_ok" == "yes" ] && cp subnodes.config /etc
-
 
 
 
