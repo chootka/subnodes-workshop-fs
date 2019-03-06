@@ -354,8 +354,6 @@ EOF
 		# create hostapd configuration with user's settings
 		echo -en "Creating hostapd.conf file..."
 		cat <<EOF > /etc/hostapd/hostapd.conf
-source /etc/subnodes.config
-
 interface=wlan0
 bridge=br0
 driver=$RADIO_DRIVER
@@ -460,8 +458,6 @@ EOF
 		# create hostapd configuration with user's settings
 		echo -en "Creating hostapd.conf file..."
 		cat <<EOF > /etc/hostapd/hostapd.conf
-source /etc/subnodes.config
-
 interface=wlan0
 driver=$RADIO_DRIVER
 country_code=$AP_COUNTRY

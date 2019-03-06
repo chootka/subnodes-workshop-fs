@@ -54,10 +54,10 @@ source /etc/subnodes.config
 			# sed -i "s/dhcp-option=option:router,.*/dhcp-option=option:router,$DHCP_ROUTER/g" /etc/dnsmasq.conf
 			service dnsmasq start
 
-			# sed -i "s/driver=.*/driver=$RADIO_DRIVER/g" /etc/hostapd/hostapd.conf
-			# sed -i "s/country_code=.*/country_code=$AP_COUNTRY/g" /etc/hostapd/hostapd.conf
-			# sed -i "s/ssid=.*/ssid=$AP_SSID/g" /etc/hostapd/hostapd.conf
-			# sed -i "s/channel=.*/channel=$AP_CHAN/g" /etc/hostapd/hostapd.conf
+			sed -i "s/driver=.*/driver=$RADIO_DRIVER/g" /etc/hostapd/hostapd.conf
+			sed -i "s/country_code=.*/country_code=$AP_COUNTRY/g" /etc/hostapd/hostapd.conf
+			sed -i "s/ssid=.*/ssid=$AP_SSID/g" /etc/hostapd/hostapd.conf
+			sed -i "s/channel=.*/channel=$AP_CHAN/g" /etc/hostapd/hostapd.conf
 			hostapd -B /etc/hostapd/hostapd.conf
 			service lighttpd start
 			;;
