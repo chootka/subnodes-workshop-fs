@@ -31,19 +31,6 @@ REV="$(cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}')"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# LOAD CONFIG FILE WITH USER OPTIONS
-#
-#  READ configuration file
-. ./subnodes.config
-
-
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # CHECK USER PRIVILEGES
 (( `id -u` )) && echo "This script *must* be ran with root privileges, try prefixing with sudo. i.e sudo $0" && exit 1
 
@@ -133,6 +120,16 @@ usermod -a -G www-data pi
 echo ""
 echo "Loading the subnodes configuration file..."
 
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# COPY CONFIG FILE TO /etc WITH USER OPTIONS
+#
 # Check if configuration exists, ask for overwriting
 if [ -e /etc/subnodes.config ] ; then
         read -p "Older config file found! Overwrite? (y/n) [N]" -e $q
