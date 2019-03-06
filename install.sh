@@ -124,7 +124,7 @@ lighttpd-enable-mod fastcgi-php
 # restart lighttpd
 service lighttpd force-reload
 # Change the directory owner and group
-chown www-data:www-data /var/www
+chown -R www-data:www-data /var/www
 # allow the group to write to the directory
 chmod 775 /var/www
 # Add the pi user to the www-data group
@@ -297,17 +297,11 @@ case $DO_SET_MESH in
 		sed -i '$a batman-adv' /etc/modules
 		modprobe batman-adv;
 
-		# pass the selected mesh ssid into mesh startup script
-		sed -i "s/MTU/$MTU/" scripts/subnodes_mesh.sh
-		sed -i "s/SSID/$MESH_SSID/" scripts/subnodes_mesh.sh
-		sed -i "s/CELL_ID/$CELL_ID/" scripts/subnodes_mesh.sh
-		sed -i "s/CHAN/$MESH_CHANNEL/" scripts/subnodes_mesh.sh
-		sed -i "s/GW_MODE/$GW_MODE/" scripts/subnodes_mesh.sh
-		sed -i "s/GW_IP/$GW_IP/" scripts/subnodes_mesh.sh
-
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
+source /etc/subnodes.config
+
 # DHCP server
 dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
 dhcp-option=option:router,$DHCP_ROUTER
@@ -328,6 +322,8 @@ EOF
 		# create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
 		cat <<EOF > /etc/network/interfaces
+source /etc/subnodes.config
+
 auto lo
 iface lo inet loopback
 
@@ -361,6 +357,8 @@ EOF
 		# create hostapd configuration with user's settings
 		echo -en "Creating hostapd.conf file..."
 		cat <<EOF > /etc/hostapd/hostapd.conf
+source /etc/subnodes.config
+
 interface=wlan0
 bridge=br0
 driver=$RADIO_DRIVER
@@ -415,7 +413,9 @@ EOF
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file with captive portal and DHCP server..."
 		cat <<EOF > /etc/dnsmasq.conf
-# Captive Portal logic (redirects traffic coming in on br0 to our web server)
+source /etc/subnodes.config
+
+# Captive Portal logic (redirects traffic to our web server)
 interface=wlan0
 address=/#/$AP_IP
 address=/apple.com/0.0.0.0
@@ -435,6 +435,8 @@ EOF
 		# create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
 		cat <<EOF > /etc/network/interfaces
+source /etc/subnodes.config
+
 auto lo
 iface lo inet loopback
 
@@ -461,6 +463,8 @@ EOF
 		# create hostapd configuration with user's settings
 		echo -en "Creating hostapd.conf file..."
 		cat <<EOF > /etc/hostapd/hostapd.conf
+source /etc/subnodes.config
+
 interface=wlan0
 driver=$RADIO_DRIVER
 country_code=$AP_COUNTRY

@@ -29,22 +29,24 @@ WLAN1=${IW1[1]}
 
 echo $PHY $WLAN1 > /tmp/mesh.log
 
+source /etc/subnodes.config
+
 	case "$1" in
 		start)
 			echo "Starting $NAME mesh point on interface $PHY:$WLAN1..."
 
 			ifconfig $WLAN1 down
-			ifconfig $WLAN1 mtu MTU
-			iwconfig $WLAN1 mode ad-hoc essid SSID ap CELL_ID channel CHAN
+			ifconfig $WLAN1 mtu $MTU
+			iwconfig $WLAN1 mode ad-hoc essid $MESH_SSID ap $CELL_ID channel $MESH_CHANNEL
 
 			# add the interface to batman
 			batctl if add $WLAN1
 			# bridge loop avoidance
 			batctl ap_isolation 1
 			batctl bl 1
-			batctl gw_mode GW_MODE
+			batctl gw_mode $GW_MODE
 
-			route add default gw GW_IP
+			route add default gw $GW_IP
 
 			# add bat0 to our bridge
 			if [[ -x /sys/class/net/br0 ]]; then

@@ -29,6 +29,8 @@ WLAN0=${IW0[1]}
 
 echo $PHY $WLAN0 > /tmp/ap.log
 
+source /etc/subnodes.config
+
 	case "$1" in
 		start)
 			echo "Starting $NAME access point on interfaces $PHY:$WLAN0..."
@@ -46,8 +48,16 @@ echo $PHY $WLAN0 > /tmp/ap.log
 			# bring up access point iface wireless access point interface
 			ifconfig $WLAN0 up
 
-			# start the hostapd and dnsmasq services
+			# load configuration vars and start the hostapd and dnsmasq services
+			# sed -i "s/address=.*/address=$AP_IP/g" /etc/dnsmasq.conf
+			# sed -i "s/dhcp-range=.*/dhcp-range=$AP_DHCP_START,$AP_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
+			# sed -i "s/dhcp-option=option:router,.*/dhcp-option=option:router,$DHCP_ROUTER/g" /etc/dnsmasq.conf
 			service dnsmasq start
+
+			# sed -i "s/driver=.*/driver=$RADIO_DRIVER/g" /etc/hostapd/hostapd.conf
+			# sed -i "s/country_code=.*/country_code=$AP_COUNTRY/g" /etc/hostapd/hostapd.conf
+			# sed -i "s/ssid=.*/ssid=$AP_SSID/g" /etc/hostapd/hostapd.conf
+			# sed -i "s/channel=.*/channel=$AP_CHAN/g" /etc/hostapd/hostapd.conf
 			hostapd -B /etc/hostapd/hostapd.conf
 			service lighttpd start
 			;;
