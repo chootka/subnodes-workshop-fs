@@ -489,7 +489,7 @@ EOF
 esac
 
 
-
+echo "denyinterfaces wlan0" >> /etc/dhcpcd.conf
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -500,7 +500,8 @@ esac
 #
 
 clear
-update-rc.d hostapd remove
+#update-rc.d hostapd remove
+update-rc.d hostpad enable
 update-rc.d dnsmasq enable
 
 read -p "Do you wish to reboot now? [N] " yn
