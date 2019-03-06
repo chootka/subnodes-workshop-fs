@@ -118,7 +118,7 @@ chmod 775 /var/www
 usermod -a -G www-data pi
 
 echo ""
-echo "Loading the subnodes configuration file..."
+echo "Copying the subnodes configuration file to /etc/..."
 
 
 
@@ -132,13 +132,14 @@ echo "Loading the subnodes configuration file..."
 #
 # Check if configuration exists, ask for overwriting
 if [ -e /etc/subnodes.config ] ; then
-        read -p "Older config file found! Overwrite? (y/n) [N]" -e $q
-        if [ "$q" == "y" ] ; then
-                echo "...overwriting"
-                copy_ok="yes"
-        else
-                echo "...not overwriting."
-        fi
+        read -p "Older config file found! Overwrite? (y/n) [N] " yn
+		case $yn in
+			[Yy]* )
+				echo "...overwriting"
+				copy_ok="yes"
+			;;
+			[Nn]* ) echo "...not overwriting.";;
+		esac
 else
         copy_ok="yes"
 fi
