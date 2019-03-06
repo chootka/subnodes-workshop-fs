@@ -43,7 +43,7 @@ case $yn in
 		echo ""
 		echo -en "Purging lighttpd, mysql, php5, iw, batctl, bridge-utils, hostapd and dnsmasq... 			"
 		# how do i uninstall with apt-get
-		apt-get purge -y bridge-utils hostapd dnsmasq batctl iw lighttpd php5-common php5-cgi php5 mysql-server php5-mysql
+		apt-get purge -y dnsutils samba samba-common-bin batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
 		apt-get autoremove
 		echo -en "[OK]\n"
 

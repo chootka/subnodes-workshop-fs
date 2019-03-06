@@ -4,7 +4,7 @@
 # Author: Sarah Grant
 # Contributors: Mark Hansen, Matthias Strubel, Danja Vasiliev
 # took guidance from a script by Paul Miller : https://dl.dropboxusercontent.com/u/1663660/scripts/install-rtl8188cus.sh
-# Updated 26 Nov 2017
+# Updated 6 March 2019
 #
 # TO-DO
 # - allow a selection of radio drivers
@@ -33,6 +33,19 @@ REV="$(cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}')"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # CHECK USER PRIVILEGES
 (( `id -u` )) && echo "This script *must* be ran with root privileges, try prefixing with sudo. i.e sudo $0" && exit 1
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #	
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #	
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #	
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #	
+# LOAD CONFIG FILE WITH USER OPTIONS	
+#	
+#  READ configuration file	
+. ./subnodes.config
 
 
 
@@ -104,8 +117,8 @@ esac
 #
 
 # update the packages
-echo "Updating apt-get and installing iw, dnsutils, samba, samba-common-bin, batctl, lighttpd, sqlite3 and php7.0 packages..."
-apt-get update && apt-get install -y iw dnsutils samba samba-common-bin batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
+echo "Updating apt-get and installing dnsutils, samba, samba-common-bin, batctl, lighttpd, sqlite3 and php7.0 packages..."
+apt-get update && apt-get install -y dnsutils samba samba-common-bin batctl lighttpd sqlite3 php7.0 php7.0-common php7.0-cgi php7.0-sqlite3
 lighttpd-enable-mod fastcgi
 lighttpd-enable-mod fastcgi-php
 # restart lighttpd
@@ -138,7 +151,9 @@ if [ -e /etc/subnodes.config ] ; then
 				echo "...overwriting"
 				copy_ok="yes"
 			;;
-			[Nn]* ) echo "...not overwriting.";;
+			[Nn]* ) echo "...not overwriting. Re-reading found configuration file."
+					. /etc/subnodes.config
+			;;
 		esac
 else
         copy_ok="yes"
@@ -189,14 +204,14 @@ else
 fi	
 
 echo -en "Copying smb.conf file over from scripts..."
-cp scripts/smb.conf /etc/samba/smb.conf
+cp conf/smb.conf /etc/samba/smb.conf
 /etc/init.d/samba restart
 
 echo -en "Symlink samba public directory to web server for read-only access at /var/www/public..."
 # create a directory for browsing the public file share
 ln -s /home/pi/public /var/www/html/public
 touch /home/pi/public/helloworld.txt
-echo "hello world! browse my file share :)"> /home/pi/public/helloworld.txt
+echo "Hello world! Browse my file share :)"> /home/pi/public/helloworld.txt
 
 # make the directory listing available for this directory
 echo -en "Creating backup of lighttpd configuration file..."
@@ -294,11 +309,9 @@ case $DO_SET_MESH in
 		sed -i '$a batman-adv' /etc/modules
 		modprobe batman-adv;
 
-		# configure dnsmasq
+		# configure dnsmasq. Why is there no captive portal line?
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
-source /etc/subnodes.config
-
 # DHCP server
 dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE
 dhcp-option=option:router,$DHCP_ROUTER
@@ -316,11 +329,12 @@ EOF
 		echo -en "[OK]\n"
 	fi
 
-		# create new /etc/network/interfaces
+		# copy iface stanzas; create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
-		cat <<EOF > /etc/network/interfaces
-source /etc/subnodes.config
+		cp networks/interfaces/wlan0 /etc/network/interfaces.d/wlan0
+		cp networks/interfaces/br0 /etc/network/interfaces.d/br0
 
+		cat <<EOF > /etc/network/interfaces
 auto lo
 iface lo inet loopback
 
@@ -328,17 +342,7 @@ allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
 
-auto wlan0
-iface wlan0 inet static
-address $AP_IP
-netmask $AP_NETMASK
-
-auto br0
-iface br0 inet static
-address $BRIDGE_IP
-netmask $BRIDGE_NETMASK
-bridge_ports bat0 wlan0
-bridge_stp off
+source /etc/network/interfaces.d/*
 
 iface default inet dhcp
 EOF
@@ -408,8 +412,6 @@ EOF
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file with captive portal and DHCP server..."
 		cat <<EOF > /etc/dnsmasq.conf
-source /etc/subnodes.config
-
 # Captive Portal logic (redirects traffic to our web server)
 interface=wlan0
 address=/#/$AP_IP
@@ -426,12 +428,11 @@ EOF
 		else
 			echo -en "[OK]\n"
 		fi
-
-		# create new /etc/network/interfaces
+		
+		# copy iface stanzas; create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
+		cp networks/interfaces/wlan0 /etc/network/interfaces.d/wlan0
 		cat <<EOF > /etc/network/interfaces
-source /etc/subnodes.config
-
 auto lo
 iface lo inet loopback
 
@@ -439,10 +440,7 @@ allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
 
-auto wlan0
-iface wlan0 inet static
-address $AP_IP
-netmask $AP_NETMASK
+source /etc/network/interfaces.d/*
 
 iface default inet dhcp
 EOF

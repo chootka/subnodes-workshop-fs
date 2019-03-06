@@ -1,6 +1,7 @@
 #!/bin/bash
 # /etc/init.d/subnodes_mesh
 # starts up mesh0, bat0 interfaces
+# Updated 6 March 2019
 
 ### BEGIN INIT INFO
 # Provides:          subnodes_mesh

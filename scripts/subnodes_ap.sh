@@ -1,6 +1,7 @@
 #!/bin/bash
 # /etc/init.d/subnodes_ap
 # starts up node.js app, access point interface, hostapd, and dnsmasq for broadcasting a wireless network with captive portal
+# Updated 6 March 2019
 
 ### BEGIN INIT INFO
 # Provides:          subnodes_ap
@@ -37,6 +38,7 @@ source /etc/subnodes.config
 
 			# associate the access point interface to a physical devices
 			ifconfig $WLAN0 down
+			
 			# put iface into AP mode
 			iw phy $PHY interface add $WLAN0 type __ap
 
@@ -48,21 +50,42 @@ source /etc/subnodes.config
 			# bring up access point iface wireless access point interface
 			ifconfig $WLAN0 up
 
-			# load configuration vars and start the hostapd and dnsmasq services
-			# sed -i "s/address=.*/address=$AP_IP/g" /etc/dnsmasq.conf
-			# sed -i "s/dhcp-range=.*/dhcp-range=$AP_DHCP_START,$AP_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
-			# sed -i "s/dhcp-option=option:router,.*/dhcp-option=option:router,$DHCP_ROUTER/g" /etc/dnsmasq.conf
+			# load configuration vars and start networking services
+			sed -i "s/address=.*/address=$AP_IP/g" /etc/network/interfaces.d/wlan0
+			sed -i "s/netmask=.*/netmask=$AP_NETMASK/g" /etc/network/interfaces.d/wlan0
+			
+			if [[ $DO_SET_MESH = "y" ]]; then
+				sed -i "s/address=.*/address=$BRIDGE_IP/g" /etc/network/interfaces.d/br0
+				sed -i "s/netmask=.*/netmask=$BRIDGE_NETMASK/g" /etc/network/interfaces.d/br0
+			fi
+			/etc/init.d/networking restart
+
+			
+			# load configuration vars and start dnsmasq services
+			sed -i "s/address=.*/address=$AP_IP/g" /etc/dnsmasq.conf
+			
+			if [[ $DO_SET_MESH = "y" ]]; then
+				sed -i "s/dhcp-range=.*/dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
+				sed -i "s/dhcp-option=option:router,.*/dhcp-option=option:router,$DHCP_ROUTER/g" /etc/dnsmasq.conf
+				sed -i "s/server=.*/server=$DNS/g" /etc/dnsmasq.conf
+			else
+				sed -i "s/dhcp-range=.*/dhcp-range=$AP_DHCP_START,$AP_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
+			fi
 			service dnsmasq start
 
+			
+			# load configuration vars and start hostapd services
 			sed -i "s/driver=.*/driver=$RADIO_DRIVER/g" /etc/hostapd/hostapd.conf
 			sed -i "s/country_code=.*/country_code=$AP_COUNTRY/g" /etc/hostapd/hostapd.conf
 			sed -i "s/ssid=.*/ssid=$AP_SSID/g" /etc/hostapd/hostapd.conf
 			sed -i "s/channel=.*/channel=$AP_CHAN/g" /etc/hostapd/hostapd.conf
 			hostapd -B /etc/hostapd/hostapd.conf
 			service lighttpd start
-			;;
+		;;
+
 		status)
 		;;
+
 		stop)
 
 			ifconfig $WLAN0 down

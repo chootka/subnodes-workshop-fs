@@ -1,0 +1,4 @@
+auto wlan0
+iface wlan0 inet static
+address $AP_IP
+netmask $AP_NETMASK

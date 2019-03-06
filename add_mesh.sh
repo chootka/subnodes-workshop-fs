@@ -2,7 +2,7 @@
 #
 # Raspberry Pi Mesh Point configuration
 # Author: Sarah Grant
-# Updated 15 August 2017
+# Updated 6 March 2019
 #
 # TO-DO
 # - fix addressing to avoid collisions below w/avahi
@@ -107,14 +107,6 @@ case $DO_SET_MESH in
 		sed -i '$a batman-adv' /etc/modules
 		modprobe batman-adv;
 
-		# pass custom params into mesh startup script
-		sed -i "s/MTU/$MTU/" scripts/subnodes_mesh.sh
-		sed -i "s/SSID/$MESH_SSID/" scripts/subnodes_mesh.sh
-		sed -i "s/CELL_ID/$CELL_ID/" scripts/subnodes_mesh.sh
-		sed -i "s/CHAN/$MESH_CHANNEL/" scripts/subnodes_mesh.sh
-		sed -i "s/GW_MODE/$GW_MODE/" scripts/subnodes_mesh.sh
-		sed -i "s/GW_IP/$GW_IP/" scripts/subnodes_mesh.sh
-
 		# configure dnsmasq
 		echo -en "Creating dnsmasq configuration file..."
 		cat <<EOF > /etc/dnsmasq.conf
@@ -135,8 +127,11 @@ EOF
 		echo -en "[OK]\n"
 	fi
 
-		# create new /etc/network/interfaces
+		# copy iface stanzas; create new /etc/network/interfaces
 		echo -en "Creating new network interfaces with your settings..."
+		cp networks/interfaces/wlan0 /etc/network/interfaces.d/wlan0
+		cp networks/interfaces/br0 /etc/network/interfaces.d/br0
+
 		cat <<EOF > /etc/network/interfaces
 auto lo
 iface lo inet loopback
@@ -145,17 +140,7 @@ allow-hotplug eth0
 auto eth0
 iface eth0 inet dhcp
 
-auto wlan0
-iface wlan0 inet static
-address $AP_IP
-netmask $AP_NETMASK
-
-auto br0
-iface br0 inet static
-address $BRIDGE_IP
-netmask $BRIDGE_NETMASK
-bridge_ports bat0 wlan0
-bridge_stp off
+source /etc/network/interfaces.d/*
 
 iface default inet dhcp
 EOF
