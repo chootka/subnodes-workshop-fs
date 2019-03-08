@@ -33,7 +33,7 @@ Also, if this is your first time connecting to your Raspberry Pi headlessly (i.e
 
 * configure your wireless access point and mesh network in subnodes.config in any text editor, or in the command line you can use nano
 
-        cd subnodes
+        cd subnodes-workshop-fs
         nano subnodes.config
 
 * run the installation script
