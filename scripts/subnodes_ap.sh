@@ -80,7 +80,6 @@ source /etc/subnodes.config
 			sed -i "s/country_code=.*/country_code=$AP_COUNTRY/g" /etc/hostapd/hostapd.conf
 			sed -i "s/ssid=.*/ssid=$AP_SSID/g" /etc/hostapd/hostapd.conf
 			sed -i "s/channel=.*/channel=$AP_CHAN/g" /etc/hostapd/hostapd.conf
-			iw phy $PHY interface add mon0 type monitor && ifconfig mon0 up
 			hostapd -B /etc/hostapd/hostapd.conf
 
 			# start our web server
