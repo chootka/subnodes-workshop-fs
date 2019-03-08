@@ -62,7 +62,7 @@ source /etc/subnodes.config
 
 
 			# load configuration vars and start dnsmasq services
-			
+
 			if [[ $DO_SET_MESH = "y" ]]; then
 				sed -i "s/address=\/#\/.*/address=\/#\/$BRIDGE_IP/g" /etc/dnsmasq.conf
 				sed -i "s/dhcp-range=.*/dhcp-range=$BR_DHCP_START,$BR_DHCP_END,$DHCP_NETMASK,$DHCP_LEASE/g" /etc/dnsmasq.conf
